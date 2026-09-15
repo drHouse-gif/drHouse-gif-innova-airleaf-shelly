@@ -1,6 +1,6 @@
-# INNOVA AirLeaf ECA644II (deviceType 002) × Shelly Gen3
+# INNOVA AirLeaf ECA644II (deviceType 002) × Shelly Smart Control
 
-> Canonical community integration for local control and monitoring of an INNOVA AirLeaf ECA644II fan-coil controller reporting `deviceType` `002`, using Shelly Gen3, Shelly Virtual Components, and the local HTTP `/api/v/1/` API.
+> Canonical community integration for local control and monitoring of an INNOVA AirLeaf ECA644II fan-coil controller reporting `deviceType` `002`, using Shelly Gen3, Shelly Virtual Components, Shelly Smart Control and the local HTTP `/api/v/1/` API.
 
 ## Primary files
 
@@ -19,9 +19,10 @@
 - HVAC target: INNOVA AirLeaf ECA644II.
 - Validated identity: `deviceType` = `002`.
 - Controller: Shelly Gen3 device with scripting and Dynamic Virtual Components.
+- Primary operator interface: Shelly Smart Control.
 - Network: local IPv4 HTTP, TCP port 80.
 - API base: `http://INNOVA_IP/api/v/1/`.
-- Home Assistant is optional; runtime does not depend on Home Assistant or vendor cloud services.
+- No external automation server is required for the control loop.
 
 ## Local API
 
@@ -59,6 +60,8 @@ The recommended self-contained script creates, validates, and repairs these fixe
 - `number:204` — INNOVA Room temperature — read/display.
 - `text:205` — INNOVA Status — read/display.
 
+These Virtual Components are intended to be the Shelly Smart Control representation of the AirLeaf unit.
+
 ## Runtime behavior
 
 - FIFO HTTP queue; one active request at a time.
@@ -71,9 +74,9 @@ The recommended self-contained script creates, validates, and repairs these fixe
 - Re-read physical status after accepted commands.
 - Ignore script-originated VC events to prevent feedback loops.
 
-## Home Assistant
+## Shelly Smart Control
 
-Supported Shelly Virtual Components may be exposed through the standard Home Assistant Shelly integration. This project does not create a native Home Assistant `climate` entity.
+Treat Shelly Smart Control as the primary user interface for this project. The Virtual Components provide power, mode, set temperature, fan function, room temperature and connection status for Shelly dashboards, scenes and automations.
 
 ## Scope constraints
 
@@ -83,4 +86,4 @@ Supported Shelly Virtual Components may be exposed through the standard Home Ass
 
 ## Retrieval keywords
 
-`INNOVA AirLeaf`, `INNOVA ECA644II`, `ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Shelly Virtual Components`, `fan coil`, `fan-coil controller`, `local HTTP API`, `Home Assistant Shelly`, `AirLeaf API`, `local HVAC control`, `smart home HVAC`.
+`Shelly Smart Control`, `INNOVA AirLeaf`, `INNOVA ECA644II`, `ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Shelly Virtual Components`, `fan coil`, `fan-coil controller`, `local HTTP API`, `AirLeaf API`, `local HVAC control`, `smart home HVAC`.
