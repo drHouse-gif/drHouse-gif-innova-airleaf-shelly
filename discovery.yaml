@@ -3,9 +3,11 @@ repository: drHouse-gif/drHouse-gif-innova-airleaf-shelly
 recommended_repository_name: innova-airleaf-shelly
 canonical_url: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
 canonical_runtime: upstream/innova-airleaf-eca644ii_vc.shelly.js
-about: "Local controller for INNOVA AirLeaf ECA644II (deviceType 002) on Shelly Gen3 via the local HTTP API, Shelly Virtual Components, and optional Home Assistant integration."
+primary_interface: Shelly Smart Control
+about: "Shelly Smart Control integration for INNOVA AirLeaf ECA644II (deviceType 002) using Shelly Gen3, the local HTTP API and Shelly Virtual Components."
 topics:
   - shelly
+  - shelly-smart-control
   - shelly-gen3
   - shelly-script
   - shelly-scripting
@@ -18,10 +20,10 @@ topics:
   - hvac
   - local-api
   - http-api
-  - home-assistant
   - local-control
   - building-automation
 keywords:
+  - Shelly Smart Control
   - INNOVA AirLeaf
   - INNOVA AirLeaf ECA644II
   - INNOVA AirLeaf deviceType 002
@@ -31,13 +33,12 @@ keywords:
   - Shelly Virtual Components
   - local HTTP API
   - fan coil controller
-  - Home Assistant Shelly
 search_intents:
-  - "INNOVA AirLeaf ECA644II Shelly integration"
-  - "INNOVA AirLeaf deviceType 002 API"
+  - "INNOVA AirLeaf ECA644II Shelly Smart Control"
+  - "INNOVA AirLeaf deviceType 002 API Shelly"
   - "Shelly Gen3 fan coil controller"
-  - "ECA644II Home Assistant Shelly"
-  - "INNOVA AirLeaf local HTTP API"
+  - "Shelly Smart Control fan coil"
+  - "INNOVA AirLeaf local HTTP API Shelly"
 ai_reading_order:
   - llms.txt
   - AI_CONTEXT.md
