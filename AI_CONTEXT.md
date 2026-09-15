@@ -1,17 +1,18 @@
-# AI Context — INNOVA AirLeaf ECA644II (deviceType 002) ↔ Shelly Smart Control
+# AI Context — INNOVA AirLeaf EWF644II (deviceType 002) ↔ Shelly Smart Control
 
 ## Purpose
 
-This repository implements local monitoring and control of an **INNOVA AirLeaf ECA644II** fan-coil controller reporting `deviceType` `002`. A Shelly Gen3 script communicates directly with the unit over its local HTTP API, maps physical state into six Shelly Virtual Components, and uses **Shelly Smart Control** as the primary operator interface.
+This repository implements local monitoring and control of an **INNOVA AirLeaf EWF644II** SMART TOUCH fan-coil control with integrated Wi-Fi reporting `deviceType` `002`. A Shelly Gen3 script communicates directly with the unit over its local HTTP API, maps physical state into six Shelly Virtual Components, and uses **Shelly Smart Control** as the primary operator interface.
 
 ## Canonical implementation facts
 
-- Target: INNOVA AirLeaf ECA644II.
+- Target: INNOVA AirLeaf EWF644II.
+- Control type: SMART TOUCH with integrated Wi-Fi.
 - Validated target response: `deviceType` `002`.
 - Transport: local IPv4 / HTTP.
 - API base path: `/api/v/1/`.
 - Primary UI: Shelly Smart Control.
-- Recommended runtime: `upstream/innova-airleaf-eca644ii_vc.shelly.js`.
+- Recommended runtime: `upstream/innova-airleaf-ewf644ii_vc.shelly.js`.
 - The recommended runtime is self-contained and creates, validates, or repairs the six fixed Virtual Components before starting HTTP control.
 - The legacy/reference `innova-airleaf-controller.js` expects the components to exist already.
 - No external automation server is required for operation.
@@ -63,14 +64,15 @@ Unknown values must not be guessed or generalized.
 2. `AI_CONTEXT.md`
 3. `project.yaml`
 4. `README.md`
-5. `upstream/innova-airleaf-eca644ii_vc.shelly.js`
+5. `upstream/innova-airleaf-ewf644ii_vc.shelly.js`
 6. `ARCHITECTURE.md`
 7. `FAQ.md`
 
 ## Important constraints
 
 - Shelly Smart Control is the primary user interface and search context.
-- Do not assume other INNOVA device types share the same API semantics.
+- The correct INNOVA reference for this Wi-Fi HTTP project is `EWF644II`, not `ECA644II`.
+- Do not assume other INNOVA controls or device types share the same API semantics.
 - The API is plain HTTP and intended for a controlled local network.
 - Virtual Component IDs are fixed in the supplied runtime.
 - Commands are confirmed from physical state; a UI value can return to the previous value when the controller rejects or overrides a command.
@@ -78,4 +80,4 @@ Unknown values must not be guessed or generalized.
 
 ## Search / retrieval keywords
 
-`Shelly Smart Control`, `INNOVA AirLeaf`, `INNOVA AirLeaf ECA644II`, `ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Virtual Components`, `fan coil`, `local HTTP API`, `AirLeaf API`, `fan coil thermostat`, `local HVAC control`.
+`Shelly Smart Control`, `INNOVA AirLeaf`, `INNOVA AirLeaf EWF644II`, `EWF644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Virtual Components`, `fan coil`, `local HTTP API`, `AirLeaf API`, `fan coil thermostat`, `local HVAC control`.
