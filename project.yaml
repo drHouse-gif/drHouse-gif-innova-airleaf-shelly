@@ -1,45 +1,42 @@
-schema_version: 1
+schema_version: 2
 project:
   name: innova-airleaf-shelly
-  title: INNOVA AirLeaf ECA644II 002 Controller for Shelly Gen3
+  title: INNOVA AirLeaf ECA644II (deviceType 002) controller for Shelly Gen3
   type: local_fancoil_integration
   status: tested_community_project
   primary_language: en
   canonical_url: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
-  about: "Local controller for INNOVA AirLeaf ECA644II (deviceType 002) on Shelly Gen3 via the fan-coil's HTTP API, Shelly Virtual Components, and optional Home Assistant integration."
+  about: "Local controller for INNOVA AirLeaf ECA644II (deviceType 002) on Shelly Gen3 via the local HTTP API, Shelly Virtual Components, and optional Home Assistant integration."
   topics:
     - shelly
     - shelly-gen3
     - shelly-script
-    - shelly-scripting
     - shelly-virtual-components
-    - innova
     - innova-airleaf
     - eca644ii
     - device-type-002
-    - fancoil
     - fan-coil
     - hvac
     - local-api
     - http-api
     - home-assistant
     - local-control
-    - smart-home
-    - iot
-    - javascript
     - building-automation
   keywords:
-    - INNOVA AirLeaf
     - INNOVA AirLeaf ECA644II
-    - ECA644II
-    - deviceType 002
-    - Shelly Gen3
-    - Shelly Script
-    - Shelly Virtual Components
-    - fan coil
-    - local HTTP API
-    - Home Assistant
-    - local HVAC control
+    - INNOVA AirLeaf deviceType 002
+    - Shelly Gen3 fan coil
+    - Shelly Script HVAC
+    - local AirLeaf HTTP API
+    - Home Assistant Shelly
+canonical_runtime:
+  path: upstream/innova-airleaf-eca644ii_vc.shelly.js
+  self_contained: true
+  creates_validates_repairs_virtual_components: true
+  preferred_for_new_deployments: true
+legacy_runtime:
+  path: innova-airleaf-controller.js
+  expects_preexisting_virtual_components: true
 target:
   manufacturer: INNOVA
   family: AirLeaf
@@ -53,7 +50,7 @@ transport:
   encryption: false
 virtual_components:
   count: 6
-  current_runtime_self_creates_components: false
+  self_contained_runtime_creates_components: true
   components:
     - {key: 'boolean:200', name: 'INNOVA Power', direction: read_write}
     - {key: 'enum:201', name: 'INNOVA Mode', direction: read_write, values: [heating, cooling]}
@@ -92,17 +89,20 @@ home_assistant:
   native_climate_entity_created_by_project: false
 upstream:
   target_repository: ALLTERCO/shelly-script-examples
-  suggested_category: http-integrations
-  current_ready_for_direct_pr: false
-  blockers:
-    - Runtime script currently expects pre-existing Virtual Components.
-    - Upstream requires runtime Virtual Component scripts to self-create/verify components with the standard helper.
+  suggested_path: http-integrations/innova-airleaf/innova-airleaf-eca644ii_vc.shelly.js
+  contribution_file_ready: true
+  hardware_retest_required_before_claiming_full_validation: true
 files:
+  readme: README.md
   controller: innova-airleaf-controller.js
+  self_contained_controller: upstream/innova-airleaf-eca644ii_vc.shelly.js
   architecture: ARCHITECTURE.md
   changelog: CHANGELOG.md
+  faq: FAQ.md
   ai_context: AI_CONTEXT.md
   llms: llms.txt
+  discovery: discovery.yaml
+  citation: CITATION.cff
   github_metadata: GITHUB_METADATA.md
   upstream_submission: docs/UPSTREAM_SUBMISSION.md
 notes:
