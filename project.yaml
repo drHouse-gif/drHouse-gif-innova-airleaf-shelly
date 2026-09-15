@@ -1,14 +1,15 @@
 schema_version: 2
 project:
   name: innova-airleaf-shelly
-  title: INNOVA AirLeaf ECA644II (deviceType 002) controller for Shelly Gen3
+  title: INNOVA AirLeaf ECA644II (deviceType 002) for Shelly Smart Control
   type: local_fancoil_integration
   status: tested_community_project
   primary_language: en
   canonical_url: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
-  about: "Local controller for INNOVA AirLeaf ECA644II (deviceType 002) on Shelly Gen3 via the local HTTP API, Shelly Virtual Components, and optional Home Assistant integration."
+  about: "Shelly Smart Control integration for INNOVA AirLeaf ECA644II (deviceType 002) using Shelly Gen3, the local HTTP API and Shelly Virtual Components."
   topics:
     - shelly
+    - shelly-smart-control
     - shelly-gen3
     - shelly-script
     - shelly-virtual-components
@@ -19,16 +20,20 @@ project:
     - hvac
     - local-api
     - http-api
-    - home-assistant
     - local-control
     - building-automation
   keywords:
+    - Shelly Smart Control
     - INNOVA AirLeaf ECA644II
     - INNOVA AirLeaf deviceType 002
     - Shelly Gen3 fan coil
     - Shelly Script HVAC
     - local AirLeaf HTTP API
-    - Home Assistant Shelly
+    - Shelly Virtual Components
+interface:
+  primary: Shelly Smart Control
+  representation: Shelly Virtual Components
+  purpose: direct control monitoring dashboards scenes and automations
 canonical_runtime:
   path: upstream/innova-airleaf-eca644ii_vc.shelly.js
   self_contained: true
@@ -83,10 +88,6 @@ status_fields:
   ta: 'room temperature; tenths of degree Celsius'
   wm: 'working mode; 3 = heating, 5 = cooling'
   fn: 'fan function; 1 = auto, 2 = night, 3 = min, 4 = max'
-home_assistant:
-  required: false
-  integration: Shelly
-  native_climate_entity_created_by_project: false
 upstream:
   target_repository: ALLTERCO/shelly-script-examples
   suggested_path: http-integrations/innova-airleaf/innova-airleaf-eca644ii_vc.shelly.js
@@ -106,6 +107,7 @@ files:
   github_metadata: GITHUB_METADATA.md
   upstream_submission: docs/UPSTREAM_SUBMISSION.md
 notes:
+  - Shelly Smart Control is the primary operator interface for this project.
   - Protocol behavior was validated on a real deviceType 002 installation.
   - Do not generalize unknown working-mode or fan-function values.
   - This is an independent community project, not an official INNOVA or Shelly integration.
