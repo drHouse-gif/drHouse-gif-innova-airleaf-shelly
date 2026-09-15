@@ -1,8 +1,8 @@
-# AI Context — INNOVA AirLeaf ECA644II (deviceType 002) ↔ Shelly Gen3
+# AI Context — INNOVA AirLeaf ECA644II (deviceType 002) ↔ Shelly Smart Control
 
 ## Purpose
 
-This repository implements local monitoring and control of an **INNOVA AirLeaf ECA644II** fan-coil controller reporting `deviceType` `002`. A Shelly Gen3 script communicates directly with the unit over its local HTTP API and maps physical state into six Shelly Virtual Components.
+This repository implements local monitoring and control of an **INNOVA AirLeaf ECA644II** fan-coil controller reporting `deviceType` `002`. A Shelly Gen3 script communicates directly with the unit over its local HTTP API, maps physical state into six Shelly Virtual Components, and uses **Shelly Smart Control** as the primary operator interface.
 
 ## Canonical implementation facts
 
@@ -10,16 +10,16 @@ This repository implements local monitoring and control of an **INNOVA AirLeaf E
 - Validated target response: `deviceType` `002`.
 - Transport: local IPv4 / HTTP.
 - API base path: `/api/v/1/`.
+- Primary UI: Shelly Smart Control.
 - Recommended runtime: `upstream/innova-airleaf-eca644ii_vc.shelly.js`.
 - The recommended runtime is self-contained and creates, validates, or repairs the six fixed Virtual Components before starting HTTP control.
 - The legacy/reference `innova-airleaf-controller.js` expects the components to exist already.
-- No external server or Home Assistant is required for operation.
+- No external automation server is required for operation.
 - Poll interval: 15 seconds when the request queue is idle.
-- HTTP requests are serialized through a FIFO queue; overlapping requests are intentionally prevented.
+- HTTP requests are serialized through a FIFO queue.
 - Each accepted command is followed by a fresh status request.
 - Script-generated component events are ignored to prevent feedback loops.
 - A separate watchdog clears a request if Shelly does not deliver its HTTP callback.
-- Home Assistant is optional; the project does not create a native HA `climate` entity.
 
 ## Virtual Component map
 
@@ -31,6 +31,8 @@ This repository implements local monitoring and control of an **INNOVA AirLeaf E
 | `enum:203` | Fan (`auto`, `night`, `min`, `max`) | Enum | R/W |
 | `number:204` | Room temperature | Number | Read/display |
 | `text:205` | Connection / error status | Text | Read/display |
+
+These six components are the Shelly Smart Control representation of the AirLeaf controller.
 
 ## API operations used
 
@@ -57,23 +59,23 @@ Unknown values must not be guessed or generalized.
 
 ## Repository reading order for an AI assistant
 
-1. `llms.txt` — compact retrieval entry point.
-2. `AI_CONTEXT.md` — canonical semantic facts and constraints.
-3. `project.yaml` — structured metadata.
-4. `README.md` — human guide, setup and troubleshooting.
-5. `upstream/innova-airleaf-eca644ii_vc.shelly.js` — recommended self-contained runtime.
-6. `ARCHITECTURE.md` — queue, watchdog and state synchronization.
-7. `FAQ.md` — natural-language compatibility questions.
+1. `llms.txt`
+2. `AI_CONTEXT.md`
+3. `project.yaml`
+4. `README.md`
+5. `upstream/innova-airleaf-eca644ii_vc.shelly.js`
+6. `ARCHITECTURE.md`
+7. `FAQ.md`
 
 ## Important constraints
 
+- Shelly Smart Control is the primary user interface and search context.
 - Do not assume other INNOVA device types share the same API semantics.
 - The API is plain HTTP and intended for a controlled local network.
 - Virtual Component IDs are fixed in the supplied runtime.
 - Commands are confirmed from physical state; a UI value can return to the previous value when the controller rejects or overrides a command.
-- Never expose the local INNOVA API directly to the public internet.
 - A final manual hardware retest of the combined self-contained VC-provisioning wrapper is required before claiming that exact upstream-formatted file is fully hardware-validated.
 
 ## Search / retrieval keywords
 
-`INNOVA AirLeaf`, `INNOVA AirLeaf ECA644II`, `ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Virtual Components`, `fan coil`, `local HTTP API`, `Home Assistant Shelly`, `AirLeaf API`, `fan coil thermostat`, `local HVAC control`.
+`Shelly Smart Control`, `INNOVA AirLeaf`, `INNOVA AirLeaf ECA644II`, `ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Virtual Components`, `fan coil`, `local HTTP API`, `AirLeaf API`, `fan coil thermostat`, `local HVAC control`.
