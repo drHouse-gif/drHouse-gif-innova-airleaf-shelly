@@ -2,9 +2,9 @@ schema_version: 2
 repository: drHouse-gif/drHouse-gif-innova-airleaf-shelly
 recommended_repository_name: innova-airleaf-shelly
 canonical_url: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
-canonical_runtime: upstream/innova-airleaf-eca644ii_vc.shelly.js
+canonical_runtime: upstream/innova-airleaf-ewf644ii_vc.shelly.js
 primary_interface: Shelly Smart Control
-about: "Shelly Smart Control integration for INNOVA AirLeaf ECA644II (deviceType 002) using Shelly Gen3, the local HTTP API and Shelly Virtual Components."
+about: "Shelly Smart Control integration for INNOVA AirLeaf EWF644II (deviceType 002) using Shelly Gen3, the local HTTP API and Shelly Virtual Components."
 topics:
   - shelly
   - shelly-smart-control
@@ -14,7 +14,7 @@ topics:
   - shelly-virtual-components
   - innova
   - innova-airleaf
-  - eca644ii
+  - ewf644ii
   - device-type-002
   - fan-coil
   - hvac
@@ -25,27 +25,28 @@ topics:
 keywords:
   - Shelly Smart Control
   - INNOVA AirLeaf
-  - INNOVA AirLeaf ECA644II
+  - INNOVA AirLeaf EWF644II
   - INNOVA AirLeaf deviceType 002
-  - ECA644II
+  - EWF644II
   - Shelly Gen3
   - Shelly Script HVAC
   - Shelly Virtual Components
   - local HTTP API
   - fan coil controller
 search_intents:
-  - "INNOVA AirLeaf ECA644II Shelly Smart Control"
+  - "INNOVA AirLeaf EWF644II Shelly Smart Control"
+  - "INNOVA EWF644II Shelly"
   - "INNOVA AirLeaf deviceType 002 API Shelly"
   - "Shelly Gen3 fan coil controller"
   - "Shelly Smart Control fan coil"
-  - "INNOVA AirLeaf local HTTP API Shelly"
+  - "INNOVA AirLeaf EWF644II local HTTP API Shelly"
 ai_reading_order:
   - llms.txt
   - AI_CONTEXT.md
   - project.yaml
   - README.md
-  - upstream/innova-airleaf-eca644ii_vc.shelly.js
+  - upstream/innova-airleaf-ewf644ii_vc.shelly.js
   - FAQ.md
 upstream:
   repository: ALLTERCO/shelly-script-examples
-  suggested_path: http-integrations/innova-airleaf/innova-airleaf-eca644ii_vc.shelly.js
+  suggested_path: http-integrations/innova-airleaf/innova-airleaf-ewf644ii_vc.shelly.js
