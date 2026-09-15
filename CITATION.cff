@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If you use this INNOVA AirLeaf ECA644II Shelly integration, please cite this repository."
-title: "INNOVA AirLeaf ECA644II (deviceType 002) controller for Shelly Gen3"
+message: "If you use this INNOVA AirLeaf ECA644II Shelly Smart Control integration, please cite this repository."
+title: "INNOVA AirLeaf ECA644II (deviceType 002) for Shelly Smart Control"
 type: software
 authors:
   - alias: "drHouse-gif"
@@ -9,13 +9,13 @@ date-released: "2026-09-15"
 repository-code: "https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly"
 url: "https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly"
 keywords:
+  - "Shelly Smart Control"
   - "INNOVA AirLeaf"
   - "ECA644II"
   - "deviceType 002"
   - "Shelly Gen3"
   - "Shelly Script"
-  - "Virtual Components"
+  - "Shelly Virtual Components"
   - "fan coil"
   - "HVAC"
   - "local HTTP API"
-  - "Home Assistant"
