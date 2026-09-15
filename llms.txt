@@ -1,0 +1,10 @@
+# INNOVA AirLeaf 002 Shelly integration
+
+Primary documentation: README.md
+Machine-oriented context: AI_CONTEXT.md
+Structured metadata: project.yaml
+Production controller: innova-airleaf-controller.js
+Architecture: ARCHITECTURE.md
+Version history: CHANGELOG.md
+
+Important: protocol behavior is validated for INNOVA AirLeaf responses reporting deviceType 002. Do not assume undocumented device types or fields behave identically.

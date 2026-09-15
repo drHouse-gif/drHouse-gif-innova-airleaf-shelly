@@ -1,0 +1,67 @@
+schema_version: 1
+project:
+  name: innova-airleaf-shelly
+  title: INNOVA AirLeaf ECA644II 002 Controller for Shelly Gen3
+  type: local_fancoil_integration
+  status: tested_community_project
+  primary_language: en
+  keywords:
+    - INNOVA AirLeaf
+    - ECA644II
+    - deviceType 002
+    - Shelly Gen3
+    - Shelly Virtual Components
+    - Home Assistant
+target:
+  family: INNOVA AirLeaf
+  validated_device_type: '002'
+transport:
+  network: local_ipv4
+  protocol: HTTP
+  api_base_path: /api/v/1/
+  encryption: false
+virtual_components:
+  count: 6
+  components:
+    - {key: 'boolean:200', name: 'INNOVA Power', direction: read_write}
+    - {key: 'enum:201', name: 'INNOVA Mode', direction: read_write, values: [heating, cooling]}
+    - {key: 'number:202', name: 'INNOVA Set temperature', direction: read_write, min: 16, max: 31, step: 0.5, unit: C}
+    - {key: 'enum:203', name: 'INNOVA Fan', direction: read_write, values: [auto, night, min, max]}
+    - {key: 'number:204', name: 'INNOVA Room temperature', direction: read_only, unit: C}
+    - {key: 'text:205', name: 'INNOVA Status', direction: read_only}
+runtime:
+  poll_interval_ms: 15000
+  http_timeout_seconds: 5
+  watchdog_ms: 8000
+  serialized_requests: true
+  command_confirmation_readback: true
+  feedback_loop_protection: true
+api:
+  status: {method: GET, path: /api/v/1/status}
+  power_on: {method: POST, path: /api/v/1/power/on}
+  power_off: {method: POST, path: /api/v/1/power/off}
+  heating: {method: POST, path: /api/v/1/set/mode/heating}
+  cooling: {method: POST, path: /api/v/1/set/mode/cooling}
+  setpoint: {method: POST, path: /api/v/1/set/setpoint}
+  fan_auto: {method: POST, path: /api/v/1/set/function/auto}
+  fan_night: {method: POST, path: /api/v/1/set/function/night}
+  fan_min: {method: POST, path: /api/v/1/set/function/min}
+  fan_max: {method: POST, path: /api/v/1/set/function/max}
+status_fields:
+  ps: 'power; 1 = on'
+  sp: 'setpoint; tenths of degree Celsius'
+  ta: 'room temperature; tenths of degree Celsius'
+  wm: 'working mode; 3 = heating, 5 = cooling'
+  fn: 'fan function; 1 = auto, 2 = night, 3 = min, 4 = max'
+home_assistant:
+  required: false
+  integration: Shelly
+  native_climate_entity_created_by_project: false
+files:
+  controller: innova-airleaf-controller.js
+  architecture: ARCHITECTURE.md
+  changelog: CHANGELOG.md
+  ai_context: AI_CONTEXT.md
+notes:
+  - Protocol behavior was validated on a real deviceType 002 installation.
+  - Do not generalize unknown working-mode or fan-function values.
