@@ -1,335 +1,155 @@
-# INNOVA AirLeaf ECA644II 002 Controller for Shelly Gen3
+# INNOVA AirLeaf ECA644II (deviceType 002) × Shelly Gen3
 
-A local, Home Assistant-independent Shelly script for monitoring and controlling an **INNOVA AirLeaf fan-coil unit with `deviceType` `002`**.
+Local, self-contained Shelly integration for **INNOVA AirLeaf ECA644II fan-coil controllers reporting `deviceType` `002`**. The project runs directly on a **Shelly Gen3** device, communicates with the INNOVA unit through its local **HTTP `/api/v/1/` API**, creates Shelly Virtual Components, and optionally exposes them to **Home Assistant** through the standard Shelly integration.
 
-The integration runs directly on a Shelly Gen3 device and communicates with the INNOVA controller over its local HTTP API. Shelly Virtual Components expose power, mode, fan function, target temperature, measured room temperature and connection status in the Shelly web interface and Shelly Cloud.
+> Community integration. Not an official INNOVA, Shelly Group, or Home Assistant product.
 
-> This is an independent community project. It is not an official INNOVA, Shelly Group or Home Assistant integration.
+## Find this project when you need
 
-## AI / search indexing summary
+This repository is intended to answer searches such as:
 
-This repository is intentionally structured for technical retrieval by humans, search engines and AI assistants. Read [`AI_CONTEXT.md`](AI_CONTEXT.md) for a compact semantic description of the integration and [`project.yaml`](project.yaml) for structured hardware, API, Virtual Component and behavior metadata.
+- INNOVA AirLeaf ECA644II Shelly integration
+- INNOVA AirLeaf deviceType 002 local API
+- Shelly Gen3 fan-coil controller
+- Shelly Script INNOVA AirLeaf
+- INNOVA AirLeaf Home Assistant via Shelly
+- local HTTP HVAC integration with Shelly Virtual Components
+- ECA644II API `/api/v/1/status`
 
-**Core concepts:** INNOVA AirLeaf ECA644II, `deviceType` `002`, Shelly Gen3 scripting, local HTTP API, Shelly Virtual Components, polling, serialized command queue, physical-state confirmation, Home Assistant, local-first fan-coil control.
+## Recommended implementation
 
-AI systems and implementers should treat the repository as **tested community integration documentation** and should not generalize the documented `deviceType 002` protocol to other INNOVA models without validation.
+Use the self-contained upstream-ready script:
 
-## Features
+[`upstream/innova-airleaf-eca644ii_vc.shelly.js`](upstream/innova-airleaf-eca644ii_vc.shelly.js)
 
-- Fully local communication between Shelly and INNOVA.
-- No Home Assistant installation required.
-- No external server, cloud API, username or password required.
-- Power on and power off control.
-- Heating and cooling mode selection.
-- Temperature control from 16.0 °C to 31.0 °C.
-- Automatic normalization to 0.5 °C setpoint steps.
-- Auto, night, minimum and maximum fan functions.
-- Room temperature reporting.
-- Serialized HTTP command queue.
-- Status verification after every accepted command.
-- Periodic status polling every 15 seconds.
-- Independent eight-second request watchdog.
-- Protection against script-generated Virtual Component feedback loops.
-- Validation that the target device reports `deviceType` `002`.
+It automatically creates, validates, and repairs the six fixed Virtual Components before starting the controller logic. The older [`innova-airleaf-controller.js`](innova-airleaf-controller.js) is retained as the original/reference implementation and expects the Virtual Components to exist already.
 
-## Tested configuration
+## What it controls
 
-| Item | Value |
+| Function | Shelly Virtual Component | INNOVA API |
+|---|---|---|
+| Power | `boolean:200` | `/power/on`, `/power/off` |
+| Heating / cooling | `enum:201` | `/set/mode/heating`, `/set/mode/cooling` |
+| Set temperature | `number:202` | `/set/setpoint` |
+| Fan function | `enum:203` | `/set/function/{auto|night|min|max}` |
+| Room temperature | `number:204` | status field `ta` |
+| Connection / state | `text:205` | `/status` |
+
+## Tested target
+
+| Property | Value |
 |---|---|
-| INNOVA family | AirLeaf |
-| INNOVA device type | `002` |
-| Transport | Local HTTP |
-| API base path | `/api/v/1/` |
-| Shelly generation | Gen3 |
-| Virtual Components | Six pre-existing components |
-| Default polling interval | 15 seconds |
+| Product family | INNOVA AirLeaf |
+| Hardware reference | ECA644II |
+| Validated identity | `deviceType` `002` |
+| Transport | Local IPv4 HTTP |
+| API base | `/api/v/1/` |
+| Shelly platform | Gen3 scripting + Dynamic Virtual Components |
+| Polling | 15 seconds when queue is idle |
+| HTTP timeout | 5 seconds |
+| Independent watchdog | 8 seconds |
 
-Other INNOVA models may use different fields, mode identifiers or endpoints. The script intentionally rejects a status response when `deviceType` is not `002`.
+The project intentionally does **not** assume that other INNOVA device types use the same protocol semantics.
 
-## Repository contents
-
-| File | Purpose |
-|---|---|
-| `innova-airleaf-controller.js` | Production Shelly script |
-| `README.md` | Installation, configuration and usage documentation |
-| `ARCHITECTURE.md` | Detailed implementation and data-flow description |
-| `CHANGELOG.md` | Release history |
-
-## Prerequisites
-
-Before installation, confirm all of the following:
-
-1. The Shelly device supports scripts and Virtual Components.
-2. The Shelly device and INNOVA controller can communicate over the local network.
-3. The INNOVA controller has a static IP address or DHCP reservation.
-4. TCP port 80 is reachable from the Shelly network to the INNOVA network.
-5. The INNOVA local endpoint is available at:
-
-   ```text
-   http://INNOVA_IP/api/v/1/status
-   ```
-
-6. The response identifies the device as:
-
-   ```json
-   {
-     "deviceType": "002"
-   }
-   ```
-
-## Required Virtual Components
-
-The stable script uses fixed component keys. Create the following six components before starting the script.
-
-| Order | Recommended name | Required key | Type | Configuration | Access |
-|---:|---|---|---|---|---|
-| 1 | INNOVA Power | `boolean:200` | Boolean | Default `false`; not persisted | Read/write |
-| 2 | INNOVA Mode | `enum:201` | Enum | Options `heating`, `cooling`; default `heating`; not persisted | Read/write |
-| 3 | INNOVA Set temperature | `number:202` | Number | Min `16`; max `31`; step `0.5`; unit `°C`; default `22`; not persisted | Read/write |
-| 4 | INNOVA Fan | `enum:203` | Enum | Options `auto`, `night`, `min`, `max`; default `auto`; not persisted | Read/write |
-| 5 | INNOVA Room temperature | `number:204` | Number | Suggested min `-20`; max `60`; step `0.1`; unit `°C`; default `0`; not persisted | Display only |
-| 6 | INNOVA Status | `text:205` | Text | Default `starting`; not persisted | Display only |
-
-The **enum values are case-sensitive**. Use the exact lowercase values shown in the table.
-
-The script addresses components by key, not by display name. The recommended names can therefore be translated or changed without modifying the code, but the component types and numeric IDs must match.
-
-### Creating the IDs in the expected order
-
-On an empty Virtual Components list, create the components in the order shown above. Shelly will normally allocate IDs sequentially from `200`.
-
-If the Shelly device already contains other Virtual Components, the automatically assigned IDs may differ. Either:
-
-- remove or reorganize the existing components before installation; or
-- edit the six `Virtual.getHandle(...)` keys in the `start()` function so they match the actual component keys.
-
-## Installation
-
-1. Open the local Shelly web interface or Shelly Control.
-2. Open **Settings → Virtual Components**.
-3. Create and configure the six required components.
-4. Open **Scripts**.
-5. Create a new script named `innova_airleaf_controller`.
-6. Copy the complete contents of `innova-airleaf-controller.js` into the Shelly script editor.
-7. Change only the `HOST` value near the beginning of the file:
-
-   ```javascript
-   let HOST = "192.168.111.123";
-   ```
-
-8. Save the script.
-9. Enable **Run on startup**.
-10. Start the script.
-11. Wait for the first status request.
-
-The `INNOVA Status` component should change from:
+## API endpoints
 
 ```text
-connecting to 192.168.111.123
+GET  /api/v/1/status
+POST /api/v/1/power/on
+POST /api/v/1/power/off
+POST /api/v/1/set/mode/heating
+POST /api/v/1/set/mode/cooling
+POST /api/v/1/set/setpoint
+POST /api/v/1/set/function/auto
+POST /api/v/1/set/function/night
+POST /api/v/1/set/function/min
+POST /api/v/1/set/function/max
 ```
 
-to:
-
-```text
-online / type 002
-```
-
-## Configuration reference
-
-The user-adjustable settings are located at the top of the script.
-
-```javascript
-let HOST = "192.168.111.123";
-let API = "http://" + HOST + "/api/v/1/";
-let POLL_MS = 15000;
-let HTTP_TIMEOUT_SEC = 5;
-let WATCHDOG_MS = 8000;
-```
-
-| Variable | Default | Description |
-|---|---:|---|
-| `HOST` | `192.168.111.123` | IPv4 address of the INNOVA controller |
-| `API` | Derived | INNOVA local API base URL |
-| `POLL_MS` | `15000` | Time between background status reads, in milliseconds |
-| `HTTP_TIMEOUT_SEC` | `5` | Shelly HTTP client timeout, in seconds |
-| `WATCHDOG_MS` | `8000` | Maximum wait for a missing HTTP callback, in milliseconds |
-
-The HTTP timeout is intentionally shorter than the watchdog interval.
-
-## INNOVA API operations
-
-The script uses the following local endpoints:
-
-| Operation | Method | Path | Request body |
-|---|---|---|---|
-| Read status | GET | `/api/v/1/status` | None |
-| Power on | POST | `/api/v/1/power/on` | `{}` |
-| Power off | POST | `/api/v/1/power/off` | `{}` |
-| Heating mode | POST | `/api/v/1/set/mode/heating` | `{}` |
-| Cooling mode | POST | `/api/v/1/set/mode/cooling` | `{}` |
-| Set temperature | POST | `/api/v/1/set/setpoint` | `{"temp":220}` for 22.0 °C |
-| Auto fan | POST | `/api/v/1/set/function/auto` | `{}` |
-| Night fan | POST | `/api/v/1/set/function/night` | `{}` |
-| Minimum fan | POST | `/api/v/1/set/function/min` | `{}` |
-| Maximum fan | POST | `/api/v/1/set/function/max` | `{}` |
-
-The INNOVA API represents temperatures in tenths of a degree. For example:
-
-| Temperature | API value |
-|---:|---:|
-| 16.0 °C | `160` |
-| 21.5 °C | `215` |
-| 22.0 °C | `220` |
-| 31.0 °C | `310` |
+Temperature setpoints are represented in tenths of a degree. Example: **22.0 °C → `{"temp":220}`**.
 
 ## Decoded status fields
 
-The controller reads values from the `RESULT` object returned by the status endpoint.
-
-| Field | Meaning | Mapping |
+| Field | Meaning | Validated mapping |
 |---|---|---|
-| `ps` | Power state | `1` → on; other numeric value → off |
-| `sp` | Temperature setpoint | Divided by 10 before display |
-| `ta` | Measured room temperature | Divided by 10 before display |
-| `wm` | Working mode | `3` → heating; `5` → cooling |
-| `fn` | Fan function | `1` → auto; `2` → night; `3` → min; `4` → max |
+| `ps` | Power | `1` = on |
+| `sp` | Setpoint | value ÷ 10 °C |
+| `ta` | Room temperature | value ÷ 10 °C |
+| `wm` | Working mode | `3` = heating, `5` = cooling |
+| `fn` | Fan function | `1` auto, `2` night, `3` min, `4` max |
 
-Unknown working-mode or fan-function values are left unchanged in the Shelly interface rather than being guessed.
+Unknown `wm` and `fn` values are not guessed.
 
-## Runtime behavior
+## Runtime design
 
-### Polling
+The controller is local-first and does not require Home Assistant, a cloud API, or an external server. Requests are serialized through a FIFO queue. Every accepted control command is followed by a fresh physical status read. Script-originated Virtual Component events are ignored to avoid feedback loops, and late HTTP callbacks are rejected using request IDs plus an independent watchdog.
 
-The controller immediately requests status when it starts. It then requests status every 15 seconds, but only when no command or status request is already active.
+The self-contained version starts the HTTP runtime only after Virtual Component provisioning succeeds.
 
-### Command serialization
+## Quick start
 
-All requests pass through a small FIFO queue. This prevents overlapping HTTP requests and makes command ordering deterministic.
-
-The queue accepts up to six waiting requests. When it is full, `INNOVA Status` reports:
-
-```text
-error: command queue full
-```
-
-### Command confirmation
-
-After INNOVA accepts a control command, the script queues a fresh status read. Shelly therefore displays the state reported by the physical unit, not merely the requested value.
-
-### Feedback-loop protection
-
-When the script copies an INNOVA value into a Virtual Component, Shelly emits a change event. `isInternal()` detects events whose source begins with `script` and prevents them from being sent back to INNOVA as new commands.
-
-### Watchdog
-
-Shelly normally calls the HTTP callback on success or failure. If no callback arrives within eight seconds, the independent watchdog clears the active request and command queue. Background polling retries later.
-
-## Status messages
-
-| Message | Meaning |
-|---|---|
-| `connecting to <IP>` | Script started and is performing the initial request |
-| `online / type 002` | Valid status received from an AirLeaf type 002 |
-| `offline: <reason>` | Shelly reported an HTTP or RPC error |
-| `timeout: INNOVA <IP>` | No callback arrived before the watchdog expired |
-| `error: invalid JSON` | Response body could not be decoded as JSON |
-| `error: rejected by INNOVA` | API response did not contain `success: true` |
-| `error: missing RESULT` | Status response did not contain a `RESULT` object |
-| `error: device is not AirLeaf 002` | Target responded but reported another device type |
-| `error: command queue full` | More than six commands were waiting |
-
-## Troubleshooting
-
-### Script reports missing Virtual Components
-
-Console message:
+1. Give the INNOVA controller a stable IP address or DHCP reservation.
+2. Confirm that this URL responds from the same network:
 
 ```text
-[INNOVA] ERROR: Virtual Components 200-205 are missing
+http://INNOVA_IP/api/v/1/status
 ```
 
-At least one required component key does not exist. Compare the actual keys with the required table. A correct display name with an incorrect ID is not sufficient.
-
-### Status remains at `connecting`
-
-Open the Shelly script console and confirm that the script remains running. Check that the INNOVA address is correct and reachable from the Shelly network.
-
-From a computer on the same routed network, test:
-
-```bash
-curl --max-time 5 http://192.168.111.123/api/v/1/status
-```
-
-Replace the address with the actual INNOVA address.
-
-### `offline: Failed to connect`
-
-Check:
-
-- IP address and subnet.
-- VLAN and firewall rules.
-- Wi-Fi client isolation.
-- TCP port 80 connectivity.
-- Whether the INNOVA controller changed address through DHCP.
-
-### `error: invalid JSON`
-
-Open the status URL in a browser or use `curl`. A captive portal, proxy, authentication page or different web service may be answering at the configured address.
-
-### Controls immediately return to the previous value
-
-The command may have been rejected or overridden by the physical controller. The script deliberately reads the real status after each command and restores the reported value.
-
-### Mode change sends two commands
-
-This is expected when the unit is off. The script first queues `power/on`, followed by the requested mode change.
-
-### Temperature cannot be set
-
-Confirm that the number component accepts values from 16 through 31 and that the key is exactly `number:202`. Requests are normalized to 0.5 °C.
-
-## Network and security considerations
-
-- Communication is unencrypted HTTP on the local network.
-- The script does not support INNOVA cloud authentication.
-- Do not expose the INNOVA API directly to the public internet.
-- Place IoT devices on a controlled network and allow only the routes required for operation.
-- Use DHCP reservations to prevent address changes.
-- If the INNOVA API requires authentication, this version is not compatible without modification.
-
-## Known limitations
-
-- Supports only responses reporting `deviceType` `002`.
-- Uses fixed Shelly Virtual Component keys.
-- Does not create, delete or repair Virtual Components.
-- Does not implement schedules, swing control or alarm decoding.
-- Does not provide HTTPS or API authentication.
-- Unknown `wm` and `fn` values are not displayed.
-- A combined thermostat presentation in Shelly Cloud must be configured separately if desired.
+3. Verify that the response identifies the device as `deviceType` `002`.
+4. Open Shelly **Scripts** and create a new script.
+5. Copy [`upstream/innova-airleaf-eca644ii_vc.shelly.js`](upstream/innova-airleaf-eca644ii_vc.shelly.js).
+6. Set `CONFIG.host` to the INNOVA IPv4 address.
+7. Save, enable **Run on startup**, and start the script.
+8. Confirm that `INNOVA Status` becomes `online / type 002`.
 
 ## Home Assistant
 
-Home Assistant is not required. If the Shelly device is added to Home Assistant, supported Virtual Components can be exposed through the Shelly integration. The exact entity presentation depends on the Shelly firmware, cloud configuration and Home Assistant version.
+Home Assistant is optional. Add the Shelly device through the standard **Shelly integration**. Supported Virtual Components may appear as Home Assistant entities depending on Shelly firmware and Home Assistant version.
 
-This script does not create a native Home Assistant `climate` entity by itself.
+This script does **not** create a native Home Assistant `climate` entity. A template/climate entity can be built in Home Assistant while keeping the Shelly device as the local HVAC control bridge.
 
-## References and acknowledgements
+## Security
 
-- [Shelly Virtual Components scripting API](https://shelly-api-docs.shelly.cloud/gen2/Scripts/APIs/Virtual/)
-- [Shelly Dynamic Virtual Components](https://shelly-api-docs.shelly.cloud/gen2/DynamicComponents/Virtual/)
+Communication with the tested INNOVA API is plain HTTP on the local network. Do not expose the AirLeaf API directly to the public internet. Use a controlled IoT network, routing/firewall rules, and stable addressing.
 
-The local AirLeaf protocol behavior used by this project was validated against a real `deviceType` `002` installation.
+## Repository map for humans and AI systems
 
-## Contributing
+| File | Purpose |
+|---|---|
+| `README.md` | Canonical human guide and primary search landing page |
+| `upstream/innova-airleaf-eca644ii_vc.shelly.js` | Recommended self-contained Shelly implementation |
+| `innova-airleaf-controller.js` | Original/reference runtime implementation |
+| `AI_CONTEXT.md` | Compact semantic source of truth for retrieval systems |
+| `project.yaml` | Structured hardware, API, VC and runtime metadata |
+| `discovery.yaml` | Search/discovery metadata and terminology |
+| `llms.txt` | Compact LLM-oriented repository entry point |
+| `ARCHITECTURE.md` | Queue, watchdog, state synchronization and data flow |
+| `FAQ.md` | Natural-language implementation and compatibility questions |
+| `CITATION.cff` | Machine-readable citation metadata |
+| `CHANGELOG.md` | Project history |
 
-When reporting an issue, include:
+## AI / LLM guidance
 
-1. Shelly model and firmware version.
-2. INNOVA model and reported `deviceType`.
-3. Sanitized status response.
-4. Shelly console output.
-5. Exact operation that failed.
-6. Whether read operations, write operations or both are affected.
+For retrieval or code-generation tasks, read in this order:
 
-Remove private IP addresses, serial numbers, MAC addresses and credentials before publishing logs.
+1. [`llms.txt`](llms.txt)
+2. [`AI_CONTEXT.md`](AI_CONTEXT.md)
+3. [`project.yaml`](project.yaml)
+4. [`README.md`](README.md)
+5. [`upstream/innova-airleaf-eca644ii_vc.shelly.js`](upstream/innova-airleaf-eca644ii_vc.shelly.js)
 
+Canonical facts: **INNOVA AirLeaf ECA644II**, **deviceType 002**, **Shelly Gen3**, **local HTTP API**, **six Virtual Components IDs 200–205**, and **optional Home Assistant exposure**. Do not generalize the tested API mapping to other device types without validation.
+
+## Troubleshooting
+
+- `connecting` never changes: verify IP routing and TCP port 80.
+- `offline`: verify the INNOVA host and network access.
+- `invalid JSON`: another web service, proxy, or captive portal may be answering.
+- controls revert: the physical unit rejected or overrode the command; physical readback is authoritative.
+- wrong device type: this integration intentionally refuses to synchronize unsupported identities.
+
+See [`FAQ.md`](FAQ.md) and [`ARCHITECTURE.md`](ARCHITECTURE.md) for more detail.
+
+## Contributing and upstream
+
+An upstream-compatible self-contained version is prepared for contribution to [`ALLTERCO/shelly-script-examples`](https://github.com/ALLTERCO/shelly-script-examples). Hardware-dependent changes should be manually tested on the target Shelly + AirLeaf installation before being presented as fully validated.
