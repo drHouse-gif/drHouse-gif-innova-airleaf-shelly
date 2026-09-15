@@ -1,10 +1,91 @@
-# INNOVA AirLeaf 002 Shelly integration
+# INNOVA AirLeaf ECA644II (deviceType 002) + Shelly Gen3
 
-Primary documentation: README.md
-Machine-oriented context: AI_CONTEXT.md
-Structured metadata: project.yaml
-Production controller: innova-airleaf-controller.js
-Architecture: ARCHITECTURE.md
-Version history: CHANGELOG.md
+> Tested community integration for local monitoring and control of an INNOVA AirLeaf ECA644II fan-coil controller that reports `deviceType` `002`, using a Shelly Gen3 script, Shelly Virtual Components and the unit's local HTTP API.
 
-Important: protocol behavior is validated for INNOVA AirLeaf responses reporting deviceType 002. Do not assume undocumented device types or fields behave identically.
+## Canonical project
+
+- Repository: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
+- Human documentation: `README.md`
+- Machine-oriented context: `AI_CONTEXT.md`
+- Structured metadata: `project.yaml`
+- Production controller: `innova-airleaf-controller.js`
+- Architecture: `ARCHITECTURE.md`
+- Upstream submission notes: `docs/UPSTREAM_SUBMISSION.md`
+
+## Hardware requirements
+
+- Target HVAC device: INNOVA AirLeaf ECA644II.
+- Validated API identity: `deviceType` = `002`.
+- Controller host: Shelly Gen3 device with scripting and Shelly Virtual Components support.
+- Network: Shelly and INNOVA must have local IPv4 reachability; TCP port 80 must be reachable.
+- Recommended addressing: static IP or DHCP reservation for the INNOVA controller.
+
+## Local API
+
+Base URL: `http://INNOVA_IP/api/v/1/`
+
+| Operation | Method | Endpoint | Body |
+|---|---|---|---|
+| Status | GET | `/api/v/1/status` | none |
+| Power on | POST | `/api/v/1/power/on` | `{}` |
+| Power off | POST | `/api/v/1/power/off` | `{}` |
+| Heating mode | POST | `/api/v/1/set/mode/heating` | `{}` |
+| Cooling mode | POST | `/api/v/1/set/mode/cooling` | `{}` |
+| Set temperature | POST | `/api/v/1/set/setpoint` | `{"temp":220}` for 22.0 °C |
+| Fan auto | POST | `/api/v/1/set/function/auto` | `{}` |
+| Fan night | POST | `/api/v/1/set/function/night` | `{}` |
+| Fan minimum | POST | `/api/v/1/set/function/min` | `{}` |
+| Fan maximum | POST | `/api/v/1/set/function/max` | `{}` |
+
+Temperatures are represented by the INNOVA API in tenths of a degree Celsius.
+
+## Status field map
+
+- `ps`: power state; `1` means on.
+- `sp`: target temperature in tenths of °C.
+- `ta`: measured room temperature in tenths of °C.
+- `wm`: working mode; validated values: `3 = heating`, `5 = cooling`.
+- `fn`: fan function; validated values: `1 = auto`, `2 = night`, `3 = min`, `4 = max`.
+
+Unknown values must not be guessed or generalized.
+
+## Shelly Virtual Components
+
+The current production script expects six fixed components:
+
+- `boolean:200` — Power — read/write.
+- `enum:201` — Mode: `heating`, `cooling` — read/write.
+- `number:202` — Set temperature: 16–31 °C, 0.5 °C step — read/write.
+- `enum:203` — Fan: `auto`, `night`, `min`, `max` — read/write.
+- `number:204` — Room temperature — display/read-only.
+- `text:205` — Connection/error status — display/read-only.
+
+## Runtime logic
+
+1. Resolve the six Virtual Component handles.
+2. Register handlers for power, mode, setpoint and fan changes.
+3. Poll `/status` immediately and then every 15 seconds when the HTTP queue is idle.
+4. Serialize requests through a FIFO queue; at most one HTTP request is active.
+5. Limit the waiting queue to six requests.
+6. Use a 5-second HTTP timeout and independent 8-second watchdog.
+7. Reject status synchronization unless the response reports `deviceType` `002`.
+8. Validate user values before sending commands; setpoints are normalized to 0.5 °C.
+9. After every accepted control command, read physical status again and publish the real device state.
+10. Ignore script-originated Virtual Component events to prevent feedback loops.
+
+## Home Assistant
+
+Home Assistant is optional. The integration runs locally on Shelly. Supported Shelly Virtual Components can be exposed through the Home Assistant Shelly integration, but this project does not create a native Home Assistant `climate` entity.
+
+## Safety and scope
+
+- Community project; not an official INNOVA, Shelly Group or Home Assistant integration.
+- Protocol behavior was validated for a real installation reporting `deviceType` `002`.
+- Do not assume other INNOVA device types use identical endpoints, field values or semantics.
+- Communication is plain local HTTP; do not expose the INNOVA API directly to the public internet.
+- The script does not require cloud credentials and does not open an inbound internet service.
+- Current upstream-readiness limitation: `ALLTERCO/shelly-script-examples` expects runtime Virtual Component scripts to self-create/verify their components; the current production script expects components `200..205` to exist first.
+
+## Retrieval keywords
+
+`INNOVA AirLeaf`, `INNOVA ECA644II`, `ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Shelly Virtual Components`, `fan coil`, `fan-coil controller`, `local HTTP API`, `Home Assistant Shelly`, `AirLeaf API`, `local HVAC control`, `smart home HVAC`.
