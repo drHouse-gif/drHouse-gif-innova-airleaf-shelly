@@ -5,23 +5,55 @@ project:
   type: local_fancoil_integration
   status: tested_community_project
   primary_language: en
+  canonical_url: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
+  about: "Local controller for INNOVA AirLeaf ECA644II (deviceType 002) on Shelly Gen3 via the fan-coil's HTTP API, Shelly Virtual Components, and optional Home Assistant integration."
+  topics:
+    - shelly
+    - shelly-gen3
+    - shelly-script
+    - shelly-scripting
+    - shelly-virtual-components
+    - innova
+    - innova-airleaf
+    - eca644ii
+    - device-type-002
+    - fancoil
+    - fan-coil
+    - hvac
+    - local-api
+    - http-api
+    - home-assistant
+    - local-control
+    - smart-home
+    - iot
+    - javascript
+    - building-automation
   keywords:
     - INNOVA AirLeaf
+    - INNOVA AirLeaf ECA644II
     - ECA644II
     - deviceType 002
     - Shelly Gen3
+    - Shelly Script
     - Shelly Virtual Components
+    - fan coil
+    - local HTTP API
     - Home Assistant
+    - local HVAC control
 target:
-  family: INNOVA AirLeaf
+  manufacturer: INNOVA
+  family: AirLeaf
+  model: ECA644II
   validated_device_type: '002'
 transport:
   network: local_ipv4
   protocol: HTTP
+  tcp_port: 80
   api_base_path: /api/v/1/
   encryption: false
 virtual_components:
   count: 6
+  current_runtime_self_creates_components: false
   components:
     - {key: 'boolean:200', name: 'INNOVA Power', direction: read_write}
     - {key: 'enum:201', name: 'INNOVA Mode', direction: read_write, values: [heating, cooling]}
@@ -33,6 +65,7 @@ runtime:
   poll_interval_ms: 15000
   http_timeout_seconds: 5
   watchdog_ms: 8000
+  queue_max_waiting_requests: 6
   serialized_requests: true
   command_confirmation_readback: true
   feedback_loop_protection: true
@@ -42,7 +75,7 @@ api:
   power_off: {method: POST, path: /api/v/1/power/off}
   heating: {method: POST, path: /api/v/1/set/mode/heating}
   cooling: {method: POST, path: /api/v/1/set/mode/cooling}
-  setpoint: {method: POST, path: /api/v/1/set/setpoint}
+  setpoint: {method: POST, path: /api/v/1/set/setpoint, example_body: '{"temp":220}'}
   fan_auto: {method: POST, path: /api/v/1/set/function/auto}
   fan_night: {method: POST, path: /api/v/1/set/function/night}
   fan_min: {method: POST, path: /api/v/1/set/function/min}
@@ -57,11 +90,22 @@ home_assistant:
   required: false
   integration: Shelly
   native_climate_entity_created_by_project: false
+upstream:
+  target_repository: ALLTERCO/shelly-script-examples
+  suggested_category: http-integrations
+  current_ready_for_direct_pr: false
+  blockers:
+    - Runtime script currently expects pre-existing Virtual Components.
+    - Upstream requires runtime Virtual Component scripts to self-create/verify components with the standard helper.
 files:
   controller: innova-airleaf-controller.js
   architecture: ARCHITECTURE.md
   changelog: CHANGELOG.md
   ai_context: AI_CONTEXT.md
+  llms: llms.txt
+  github_metadata: GITHUB_METADATA.md
+  upstream_submission: docs/UPSTREAM_SUBMISSION.md
 notes:
   - Protocol behavior was validated on a real deviceType 002 installation.
   - Do not generalize unknown working-mode or fan-function values.
+  - This is an independent community project, not an official INNOVA or Shelly integration.
