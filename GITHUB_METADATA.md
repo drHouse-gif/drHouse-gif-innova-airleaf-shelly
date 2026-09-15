@@ -6,18 +6,15 @@ Use this file as the canonical copy source for GitHub repository metadata and se
 
 `innova-airleaf-shelly`
 
-The current repository name contains the account name twice. Renaming it to `innova-airleaf-shelly` would improve readability and branded search matching without changing the technical content.
-
 ## About description
 
-Local controller for INNOVA AirLeaf ECA644II (deviceType 002) on Shelly Gen3 via the fan-coil's HTTP API, Shelly Virtual Components, and optional Home Assistant integration.
+Shelly Smart Control integration for INNOVA AirLeaf ECA644II (deviceType 002) using Shelly Gen3, local HTTP API and Shelly Virtual Components.
 
 ## GitHub topics
 
-GitHub supports up to 20 repository topics. Recommended set:
-
 ```text
 shelly
+shelly-smart-control
 shelly-gen3
 shelly-script
 shelly-scripting
@@ -31,7 +28,6 @@ fan-coil
 hvac
 local-api
 http-api
-home-assistant
 local-control
 smart-home
 iot
@@ -41,6 +37,7 @@ building-automation
 
 ## Primary search entities
 
+- Shelly Smart Control
 - INNOVA AirLeaf ECA644II
 - INNOVA AirLeaf deviceType 002
 - Shelly Gen3
@@ -48,28 +45,27 @@ building-automation
 - Shelly Virtual Components
 - INNOVA local HTTP API
 - fan-coil local control
-- Home Assistant Shelly integration
 
 ## High-intent search phrases
 
-- `INNOVA AirLeaf Shelly integration`
+- `INNOVA AirLeaf Shelly Smart Control`
 - `INNOVA ECA644II Shelly`
 - `INNOVA AirLeaf deviceType 002 API`
-- `control INNOVA AirLeaf locally`
-- `INNOVA AirLeaf Home Assistant Shelly`
+- `control INNOVA AirLeaf with Shelly`
+- `Shelly Smart Control fan coil`
 - `Shelly Gen3 fan coil controller`
-- `INNOVA AirLeaf HTTP API`
+- `INNOVA AirLeaf HTTP API Shelly`
 - `fan coil Shelly Virtual Components`
 
 ## Canonical technical sources
 
-1. `README.md` — installation and operator documentation.
-2. `llms.txt` — compact retrieval entry point for AI systems and automated agents.
-3. `AI_CONTEXT.md` — semantic implementation facts and constraints.
-4. `project.yaml` — structured hardware/API/component metadata.
-5. `innova-airleaf-controller.js` — production implementation.
-6. `ARCHITECTURE.md` — request queue, synchronization and failure behavior.
+1. `README.md`
+2. `llms.txt`
+3. `AI_CONTEXT.md`
+4. `project.yaml`
+5. `upstream/innova-airleaf-eca644ii_vc.shelly.js`
+6. `ARCHITECTURE.md`
 
 ## SEO / AI guidance
 
-Keep exact hardware strings consistent across README, metadata and source comments: `INNOVA AirLeaf ECA644II`, `deviceType 002`, `Shelly Gen3`. Prefer precise protocol terms over keyword repetition. This repository documents a tested community implementation; do not describe it as an official INNOVA or Shelly integration.
+Treat **Shelly Smart Control** as the primary user interface and product context. Keep exact hardware strings consistent: `INNOVA AirLeaf ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Smart Control`. Prefer precise protocol terms over keyword repetition. This is a tested community implementation, not an official INNOVA or Shelly integration.
