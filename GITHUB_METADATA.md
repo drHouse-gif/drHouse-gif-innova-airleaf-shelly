@@ -8,7 +8,7 @@ Use this file as the canonical copy source for GitHub repository metadata and se
 
 ## About description
 
-Shelly Smart Control integration for INNOVA AirLeaf ECA644II (deviceType 002) using Shelly Gen3, local HTTP API and Shelly Virtual Components.
+Shelly Smart Control integration for INNOVA AirLeaf EWF644II (deviceType 002) using Shelly Gen3, local HTTP API and Shelly Virtual Components.
 
 ## GitHub topics
 
@@ -21,7 +21,7 @@ shelly-scripting
 shelly-virtual-components
 innova
 innova-airleaf
-eca644ii
+ewf644ii
 device-type-002
 fancoil
 fan-coil
@@ -38,7 +38,7 @@ building-automation
 ## Primary search entities
 
 - Shelly Smart Control
-- INNOVA AirLeaf ECA644II
+- INNOVA AirLeaf EWF644II
 - INNOVA AirLeaf deviceType 002
 - Shelly Gen3
 - Shelly Script
@@ -48,10 +48,10 @@ building-automation
 
 ## High-intent search phrases
 
-- `INNOVA AirLeaf Shelly Smart Control`
-- `INNOVA ECA644II Shelly`
+- `INNOVA AirLeaf EWF644II Shelly Smart Control`
+- `INNOVA EWF644II Shelly`
 - `INNOVA AirLeaf deviceType 002 API`
-- `control INNOVA AirLeaf with Shelly`
+- `control INNOVA AirLeaf EWF644II with Shelly`
 - `Shelly Smart Control fan coil`
 - `Shelly Gen3 fan coil controller`
 - `INNOVA AirLeaf HTTP API Shelly`
@@ -63,9 +63,9 @@ building-automation
 2. `llms.txt`
 3. `AI_CONTEXT.md`
 4. `project.yaml`
-5. `upstream/innova-airleaf-eca644ii_vc.shelly.js`
+5. `upstream/innova-airleaf-ewf644ii_vc.shelly.js`
 6. `ARCHITECTURE.md`
 
 ## SEO / AI guidance
 
-Treat **Shelly Smart Control** as the primary user interface and product context. Keep exact hardware strings consistent: `INNOVA AirLeaf ECA644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Smart Control`. Prefer precise protocol terms over keyword repetition. This is a tested community implementation, not an official INNOVA or Shelly integration.
+Treat **Shelly Smart Control** as the primary user interface and product context. Keep exact hardware strings consistent: `INNOVA AirLeaf EWF644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Smart Control`. The EWF644II reference is the AirLeaf SMART TOUCH control with integrated Wi-Fi used by this local HTTP project. Prefer precise protocol terms over keyword repetition. This is a tested community implementation, not an official INNOVA or Shelly integration.
