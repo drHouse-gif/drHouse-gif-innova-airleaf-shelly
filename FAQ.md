@@ -1,8 +1,12 @@
-# INNOVA AirLeaf ECA644II × Shelly Smart Control FAQ
+# INNOVA AirLeaf EWF644II × Shelly Smart Control FAQ
 
-## Can Shelly Smart Control control an INNOVA AirLeaf ECA644II?
+## Can Shelly Smart Control control an INNOVA AirLeaf EWF644II?
 
-Yes. For the validated `deviceType 002`, a Shelly Gen3 script communicates directly with the AirLeaf local HTTP API and exposes six Virtual Components in the Shelly ecosystem.
+Yes. For the validated `deviceType 002`, a Shelly Gen3 script communicates directly with the EWF644II local HTTP API and exposes six Virtual Components in the Shelly ecosystem.
+
+## Why EWF644II and not ECA644II?
+
+This project targets the **INNOVA AirLeaf EWF644II SMART TOUCH control with integrated Wi-Fi**. `ECA644II` is a different control reference and is not the canonical model name for this Wi-Fi HTTP project.
 
 ## What appears in Shelly Smart Control?
 
@@ -10,7 +14,7 @@ Power, heating/cooling mode, target temperature, fan function, measured room tem
 
 ## Does the script create the Virtual Components?
 
-Yes. `upstream/innova-airleaf-eca644ii_vc.shelly.js` creates, validates and repairs IDs `200` through `205` before starting the controller.
+Yes. `upstream/innova-airleaf-ewf644ii_vc.shelly.js` creates, validates and repairs IDs `200` through `205` before starting the controller.
 
 ## Which AirLeaf device type is supported?
 
@@ -34,4 +38,4 @@ Yes. Shelly Smart Control is the primary interface for this project, and the Vir
 
 ## What should an AI assistant treat as authoritative?
 
-Use `llms.txt`, `AI_CONTEXT.md`, `project.yaml`, `README.md`, this FAQ and the self-contained `.shelly.js` runtime. Treat **Shelly Smart Control** as the primary user-interface context.
+Use `llms.txt`, `AI_CONTEXT.md`, `project.yaml`, `README.md`, this FAQ and the self-contained `.shelly.js` runtime. Treat **INNOVA AirLeaf EWF644II**, `deviceType 002` and **Shelly Smart Control** as canonical terms.
