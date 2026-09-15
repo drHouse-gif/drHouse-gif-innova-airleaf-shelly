@@ -38,11 +38,11 @@ Add INNOVA AirLeaf ECA644II (deviceType 002) local HTTP controller
 
 This PR adds a self-contained Shelly Script example for local monitoring and control of an **INNOVA AirLeaf ECA644II fan-coil controller reporting `deviceType` `002`**.
 
-The integration runs directly on a compatible Shelly Gen3 device and communicates with the INNOVA unit over its local `/api/v/1/` HTTP API. It exposes power, heating/cooling mode, temperature setpoint, fan function, measured room temperature and connection state through Shelly Virtual Components.
+The integration runs directly on a compatible Shelly Gen3 device and communicates with the INNOVA unit over its local `/api/v/1/` HTTP API. It exposes power, heating/cooling mode, temperature setpoint, fan function, measured room temperature and connection state through Shelly Virtual Components for use in **Shelly Smart Control**.
 
 ## Why this is useful
 
-The example provides a local-first HVAC integration without requiring Home Assistant, an external gateway, cloud credentials or a continuously running automation server. It also demonstrates a reusable pattern for third-party HTTP HVAC devices.
+The example provides a local-first HVAC integration centered on **Shelly Smart Control**, without requiring an external gateway, cloud credentials or a continuously running automation server. It also demonstrates a reusable pattern for third-party HTTP HVAC devices.
 
 ## Upstream compatibility
 
@@ -70,6 +70,7 @@ The example provides a local-first HVAC integration without requiring Home Assis
 - Transport: local HTTP
 - API base: `/api/v/1/`
 - Shelly: Gen3 scripting with Dynamic Virtual Components
+- Primary operator interface: Shelly Smart Control
 
 Standalone project, protocol map and architecture:
 https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
