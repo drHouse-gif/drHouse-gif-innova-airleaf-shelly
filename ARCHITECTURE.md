@@ -2,159 +2,89 @@
 
 ## Overview
 
-The controller is a bidirectional bridge between the INNOVA AirLeaf local HTTP API and six Shelly Virtual Components.
+The production runtime is a local bidirectional bridge between the INNOVA AirLeaf EWF644II HTTP API and six Shelly Virtual Components.
 
 ```mermaid
 flowchart LR
-    U["Shelly UI / Cloud"] --> VC["Virtual Components"]
-    VC --> S["Shelly script"]
-    S --> Q["Serialized HTTP queue"]
-    Q --> I["INNOVA AirLeaf 002"]
+    U["Shelly Smart Control"] --> VC["Virtual Components 200-205"]
+    VC --> S["Memory-optimized Shelly script"]
+    S --> Q["Serialized/coalescing HTTP queue"]
+    Q --> I["INNOVA AirLeaf deviceType 002"]
     I --> Q
     Q --> S
     S --> VC
 ```
 
-## Component responsibilities
+## Runtime constraints
 
-| Area | Responsibility |
-|---|---|
-| Virtual Components | User interface, cloud-visible state and command input |
-| Event handlers | Validate user input and translate it into API paths and bodies |
-| Request queue | Preserve ordering and prevent concurrent requests |
-| HTTP callback | Validate transport status, decode JSON and process API success |
-| Status decoder | Translate `ps`, `sp`, `ta`, `wm` and `fn` into Shelly values |
-| Watchdog | Recover when no HTTP callback is delivered |
-| Polling timer | Periodically reconcile Shelly with the physical device |
+The current implementation is intentionally compact because the earlier generic Virtual Component helper version could exhaust the shared Shelly script heap on Plug S Gen3. The production runtime therefore keeps the same self-provisioning behavior with a smaller fixed-component bootstrap.
 
-## Startup sequence
+The script also avoids `Array.shift()`; a tested Shelly mJS build returned `Function "shift" not found`. Queue removal uses:
 
-```mermaid
-sequenceDiagram
-    participant Script
-    participant VC as Virtual Components
-    participant API as INNOVA API
-
-    Script->>VC: Resolve fixed keys 200-205
-    Script->>VC: Register control handlers
-    Script->>VC: Set connecting status
-    Script->>API: GET /status
-    API-->>Script: deviceType and RESULT
-    Script->>VC: Apply physical state
-    Script->>VC: Set online status
+```javascript
+A = Q[0];
+Q = Q.slice(1);
 ```
 
-If any required handle is missing, initialization stops before event handlers and timers are registered.
+## Virtual Components
 
-## Request queue
+| Key | Meaning | Direction |
+|---|---|---|
+| `boolean:200` | Power | read/write |
+| `enum:201` | Heating / cooling | read/write |
+| `number:202` | Setpoint | read/write |
+| `enum:203` | Fan mode | read/write |
+| `number:204` | Room temperature | device → Shelly |
+| `text:205` | Connection / command status | script → Shelly |
 
-`jobs` is a FIFO array. `activeJob` is either `null` or the single request currently being processed.
+Existing fixed-ID components are reused and their configuration is refreshed with the current Shelly UI and Cloud metadata. Missing components are created before event handlers or polling start.
 
-The queue follows these invariants:
+## Status synchronization
 
-1. At most one Shelly HTTP request is active.
-2. `nextJob()` returns immediately while `activeJob` is not `null`.
-3. Every callback clears `activeJob` before starting another request.
-4. The watchdog also clears `activeJob` and discards queued commands.
-5. Polling never queues a status read while another request is active or waiting.
-
-## Late callback protection
-
-Every started request receives a monotonically increasing identifier as Shelly callback user data. `activeRequestId` contains the identifier expected by the current request.
-
-If the watchdog expires and a delayed callback later arrives, its identifier no longer matches. The callback returns without changing current state.
-
-## Status transaction
-
-A valid status response must satisfy all of the following:
+A valid status response must satisfy:
 
 1. Shelly RPC error code is zero.
-2. An HTTP response object exists.
-3. HTTP status code is 200.
-4. Response body is valid JSON.
-5. JSON contains `success: true`.
-6. JSON contains a `RESULT` object.
-7. `deviceType`, converted to a string, equals `002`.
+2. HTTP status is 200.
+3. The body parses as JSON.
+4. `success === true`.
+5. `RESULT` exists.
+6. `String(deviceType) === '002'`.
 
-Only then is the physical state copied into the Virtual Components.
+Only then are `ps`, `sp`, `ta`, `wm` and `fn` applied to the Virtual Components.
 
-## Command transaction
+## Command pipeline
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant VC as Virtual Component
-    participant Script
-    participant API as INNOVA API
+Controls enter a single serialized queue. Pending commands with the same semantic key can be replaced by a newer value, which prevents rapid setpoint or fan changes from flooding the AirLeaf.
 
-    User->>VC: Change value
-    VC->>Script: change event
-    Script->>API: POST command
-    API-->>Script: success response
-    Script->>API: GET status
-    API-->>Script: physical state
-    Script->>VC: Confirm actual value
-```
+After the command queue becomes idle, the script waits `settleMs` and performs one `GET /status`. The physical AirLeaf state remains authoritative.
 
-The final value displayed by Shelly is always based on the subsequent physical status response.
-
-## Feedback-loop prevention
-
-The same Virtual Component events are used for user input and script synchronization. When `applyStatus()` writes a value, Shelly emits a change event with a source similar to `script:<id>`.
-
-`isInternal()` ignores any event whose source begins with `script`. External changes from the UI, cloud or an integration are therefore handled, while synchronization writes are ignored.
-
-## Temperature representation
-
-Shelly presents temperature as a decimal number in degrees Celsius. INNOVA represents it as an integer in tenths of a degree.
-
-Read conversion:
+For a mode change while the last known state is off:
 
 ```text
-Shelly value = INNOVA value / 10
+POST power/on
+POST set/mode/<heating|cooling>
+wait settleMs
+GET status
 ```
 
-Write conversion:
+If a control command fails, subsequent dependent queued commands are discarded and the script schedules a physical status readback.
 
-```text
-INNOVA value = round(Shelly value × 10)
-```
+## Failure handling
 
-Before writing, the controller rounds the requested Shelly value to the nearest 0.5 °C and validates the inclusive 16–31 °C range.
+- transport timeout/error → status becomes offline;
+- invalid JSON → command/status fails safely;
+- API rejection → command/status fails safely;
+- missing callback → watchdog releases the active request;
+- late callback → ignored by request ID;
+- invalid user setpoint → last physical state is restored;
+- network recovery → normal idle polling resumes.
 
-## Power-before-mode behavior
+## Hardware validation
 
-If the last reported status indicates that the unit is off, a mode selection produces two queued commands:
+Current production runtime validated with:
 
-1. `POST power/on`
-2. `POST set/mode/<mode>`
-
-This preserves their order without starting simultaneous HTTP requests.
-
-## Failure recovery
-
-| Failure | Recovery |
-|---|---|
-| HTTP/RPC error | Publish offline status, continue with next queued request |
-| Invalid JSON | Publish error, continue with queue |
-| API rejection | Publish error, continue with queue |
-| Missing callback | Watchdog clears active request and queue |
-| Invalid setpoint | Restore last known physical state |
-| Missing component | Abort initialization |
-| Temporary network outage | Regular polling retries later |
-
-## Extension points
-
-Future versions could add:
-
-- Dynamic Virtual Component discovery.
-- Additional INNOVA device types.
-- Alarm and diagnostic field decoding.
-- Authentication support.
-- A configurable component-key mapping.
-- RPC endpoints for third-party integrations.
-- Optional MQTT publication.
-- Automatic grouping or thermostat presentation.
-
-Each extension should preserve command serialization, physical-state confirmation and feedback-loop protection.
-
+- Shelly Plug S Gen3
+- firmware 2.0.0
+- INNOVA AirLeaf EWF644II
+- `deviceType 002`
+- Shelly Smart Control
