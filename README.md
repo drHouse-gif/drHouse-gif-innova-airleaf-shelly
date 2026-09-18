@@ -1,16 +1,19 @@
 # INNOVA AirLeaf EWF644II × Shelly Smart Control
 
-Local Shelly integration for **INNOVA AirLeaf EWF644II** SMART TOUCH fan-coil controls with integrated Wi-Fi reporting **`deviceType 002`**. A Shelly Gen3 device communicates directly with the AirLeaf local HTTP API, creates six Shelly Virtual Components and presents the unit in **Shelly Smart Control**.
+Local Shelly integration for **INNOVA AirLeaf EWF644II** SMART TOUCH fan-coil controls with integrated Wi-Fi reporting **`deviceType 002`**. A Shelly Gen3 device communicates directly with the AirLeaf local HTTP API and exposes the fan coil through Shelly Virtual Components for **Shelly Smart Control**.
 
 > Community project. Not an official INNOVA or Shelly Group integration.
 
-## Use this project for
+## Current status
 
-- INNOVA AirLeaf EWF644II + Shelly Smart Control
-- Shelly Gen3 fan-coil integration
-- INNOVA `deviceType 002` local API
-- Shelly Virtual Components for AirLeaf
-- Shelly Script HVAC control
+The current runtime is hardware-tested on:
+
+- **Shelly Plug S Gen3**
+- firmware **2.0.0**
+- INNOVA AirLeaf reporting **`deviceType 002`**
+- local HTTP API **`/api/v/1/`**
+
+The current implementation was reduced for the constrained Shelly Gen3 script heap after the earlier generic Virtual Component helper version caused `out_of_memory` on Plug S Gen3. The production runtime now uses a compact self-contained VC bootstrap and Shelly mJS-compatible queue handling.
 
 ## Recommended script
 
@@ -18,34 +21,29 @@ Use:
 
 `upstream/innova-airleaf-ewf644ii_vc.shelly.js`
 
-The script is self-contained: it creates, validates and repairs the six required Virtual Components before starting the HTTP controller.
+Change only:
+
+```javascript
+var CONFIG = {
+  host: '192.0.2.10',
+  ...
+};
+```
+
+Replace the TEST-NET address with the local IPv4 address of the AirLeaf controller.
 
 ## Shelly Smart Control components
 
 | Component | Function |
 |---|---|
-| `boolean:200` | INNOVA Power |
+| `boolean:200` | Power |
 | `enum:201` | Heating / cooling mode |
 | `number:202` | Target temperature, 16–31 °C, step 0.5 °C |
 | `enum:203` | Fan: auto / night / min / max |
 | `number:204` | Room temperature |
-| `text:205` | Online / error status |
+| `text:205` | Online / command / error status |
 
-These components are the Shelly-side representation of the AirLeaf and are intended for **Shelly Smart Control dashboards, scenes and automations**.
-
-## Tested target
-
-- Product/control: INNOVA AirLeaf EWF644II
-- Control type: SMART TOUCH with integrated Wi-Fi
-- Validated identity: `deviceType 002`
-- Shelly platform: Gen3 scripting + Dynamic Virtual Components
-- Transport: local IPv4 HTTP
-- API base: `/api/v/1/`
-- Poll interval: 15 s
-- HTTP timeout: 5 s
-- Watchdog: 8 s
-
-Other INNOVA controls or device types must not be assumed to use the same protocol.
+The enum components include Shelly UI titles and Cloud log metadata. Temperature components use Cloud measurement metadata.
 
 ## Local API
 
@@ -74,43 +72,48 @@ Validated status fields:
 
 Unknown values are not guessed.
 
-## How it works
+## Runtime behavior
 
-The integration runs locally on Shelly. HTTP requests are serialized, commands are followed by physical status readback, and script-originated Virtual Component events are filtered to prevent feedback loops. The physical AirLeaf state remains authoritative.
+The controller:
+
+- creates or reuses the six fixed Virtual Components;
+- updates existing VC configuration so Shelly Smart Control gets current labels and metadata;
+- serializes all HTTP traffic;
+- coalesces pending changes for the same control;
+- powers the unit before changing mode when needed;
+- aborts dependent queued commands when a control request fails;
+- waits briefly and performs one physical status readback after a command burst;
+- rejects status synchronization unless `deviceType` is `002`;
+- ignores script-originated VC events to prevent feedback loops;
+- uses a watchdog plus request IDs to ignore stale callbacks;
+- avoids `Array.shift()` for compatibility with Shelly mJS builds where it is unavailable.
 
 ## Quick start
 
-1. Give the EWF644II controller a stable IP address.
+1. Give the AirLeaf controller a stable LAN address.
 2. Verify `http://INNOVA_IP/api/v/1/status`.
-3. Confirm `deviceType` is `002`.
+3. Confirm the response reports `deviceType 002`.
 4. Open **Scripts** on the Shelly Gen3 device.
 5. Paste `upstream/innova-airleaf-ewf644ii_vc.shelly.js`.
-6. Set `CONFIG.host` to the AirLeaf IP address.
-7. Enable **Run on startup** and start the script.
-8. Open **Shelly Smart Control** and use the created Virtual Components.
-
-## Shelly Smart Control is the primary interface
-
-This project is intentionally designed around the Shelly ecosystem. Use Shelly Smart Control for device presentation, dashboards, scenes and automations. The integration logic stays on the Shelly device; no separate automation server is required for normal operation.
+6. Set `CONFIG.host` to the AirLeaf local IP.
+7. Save and start the script.
+8. Verify the six Virtual Components in Shelly Smart Control.
+9. Enable **Run on startup** after the runtime is confirmed stable.
 
 ## Repository map
 
-- `README.md` — main Shelly Smart Control guide
-- `upstream/innova-airleaf-ewf644ii_vc.shelly.js` — recommended self-contained runtime
-- `AI_CONTEXT.md` — canonical AI context
+- `README.md` — deployment and behavior
+- `upstream/innova-airleaf-ewf644ii_vc.shelly.js` — current production runtime
+- `ARCHITECTURE.md` — request queue and synchronization design
+- `AI_CONTEXT.md` — canonical implementation context
 - `project.yaml` — structured project metadata
-- `discovery.yaml` — search/discovery metadata
-- `llms.txt` — LLM-oriented entry point
 - `FAQ.md` — implementation FAQ
-- `ARCHITECTURE.md` — runtime architecture
-- `CITATION.cff` — citation metadata
+- `docs/UPSTREAM_SUBMISSION.md` — Shelly upstream contribution notes
+- `llms.txt` — compact machine-readable project summary
+- `innova-airleaf-controller.js` — legacy/reference controller
 
-## AI guidance
+## Scope
 
-Treat these as canonical terms: **Shelly Smart Control**, **INNOVA AirLeaf EWF644II**, **deviceType 002**, **Shelly Gen3**, **Shelly Virtual Components**, **local HTTP API**.
+The validated target is **INNOVA AirLeaf EWF644II / deviceType 002**. Do not assume other INNOVA controls or device types use identical endpoints or value mappings without validation.
 
-Do not generalize the tested API mapping to other AirLeaf controls or device types without validation.
-
-## Upstream
-
-A self-contained version is prepared for contribution to `ALLTERCO/shelly-script-examples`. The original controller behavior was validated on a real `deviceType 002` installation; the combined self-provisioning wrapper still requires final manual hardware retest before being described as fully validated.
+Communication is unencrypted local HTTP, so the device API should remain on a trusted LAN.
