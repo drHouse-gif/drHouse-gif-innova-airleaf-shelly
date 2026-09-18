@@ -2,52 +2,32 @@ schema_version: 2
 project:
   name: innova-airleaf-shelly
   title: INNOVA AirLeaf EWF644II (deviceType 002) for Shelly Smart Control
+  version: 6.0.0
   type: local_fancoil_integration
-  status: tested_community_project
+  status: hardware_tested
   primary_language: en
   canonical_url: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
   about: "Shelly Smart Control integration for INNOVA AirLeaf EWF644II (deviceType 002) using Shelly Gen3, the local HTTP API and Shelly Virtual Components."
-  topics:
-    - shelly
-    - shelly-smart-control
-    - shelly-gen3
-    - shelly-script
-    - shelly-virtual-components
-    - innova-airleaf
-    - ewf644ii
-    - device-type-002
-    - fan-coil
-    - hvac
-    - local-api
-    - http-api
-    - local-control
-    - building-automation
-  keywords:
-    - Shelly Smart Control
-    - INNOVA AirLeaf EWF644II
-    - INNOVA AirLeaf deviceType 002
-    - Shelly Gen3 fan coil
-    - Shelly Script HVAC
-    - local AirLeaf HTTP API
-    - Shelly Virtual Components
-interface:
-  primary: Shelly Smart Control
-  representation: Shelly Virtual Components
-  purpose: direct control monitoring dashboards scenes and automations
 canonical_runtime:
   path: upstream/innova-airleaf-ewf644ii_vc.shelly.js
   self_contained: true
-  creates_validates_repairs_virtual_components: true
+  memory_optimized: true
+  creates_or_reuses_virtual_components: true
+  refreshes_virtual_component_metadata: true
   preferred_for_new_deployments: true
 legacy_runtime:
   path: innova-airleaf-controller.js
-  expects_preexisting_virtual_components: true
+  preferred: false
 target:
   manufacturer: INNOVA
   family: AirLeaf
   model: EWF644II
   control_type: SMART TOUCH with integrated Wi-Fi
   validated_device_type: '002'
+shelly_validation:
+  device: Shelly Plug S Gen3
+  firmware: '2.0.0'
+  smart_control_ui_validated: true
 transport:
   network: local_ipv4
   protocol: HTTP
@@ -56,22 +36,25 @@ transport:
   encryption: false
 virtual_components:
   count: 6
-  self_contained_runtime_creates_components: true
   components:
-    - {key: 'boolean:200', name: 'INNOVA Power', direction: read_write}
-    - {key: 'enum:201', name: 'INNOVA Mode', direction: read_write, values: [heating, cooling]}
-    - {key: 'number:202', name: 'INNOVA Set temperature', direction: read_write, min: 16, max: 31, step: 0.5, unit: C}
-    - {key: 'enum:203', name: 'INNOVA Fan', direction: read_write, values: [auto, night, min, max]}
-    - {key: 'number:204', name: 'INNOVA Room temperature', direction: read_only, unit: C}
-    - {key: 'text:205', name: 'INNOVA Status', direction: read_only}
+    - {key: 'boolean:200', name: 'INNOVA Power', direction: read_write, cloud: log}
+    - {key: 'enum:201', name: 'INNOVA Mode', direction: read_write, values: [heating, cooling], cloud: log}
+    - {key: 'number:202', name: 'INNOVA Set temperature', direction: read_write, min: 16, max: 31, step: 0.5, unit: C, cloud: measurement}
+    - {key: 'enum:203', name: 'INNOVA Fan', direction: read_write, values: [auto, night, min, max], cloud: log}
+    - {key: 'number:204', name: 'INNOVA Room temperature', direction: read_only, unit: C, cloud: measurement}
+    - {key: 'text:205', name: 'INNOVA Status', direction: read_only, cloud: log}
 runtime:
   poll_interval_ms: 15000
   http_timeout_seconds: 5
-  watchdog_ms: 8000
-  queue_max_waiting_requests: 6
+  watchdog_ms: 7500
+  settle_ms: 500
+  max_waiting_requests: 5
   serialized_requests: true
-  command_confirmation_readback: true
+  pending_command_coalescing: true
+  physical_state_readback: true
   feedback_loop_protection: true
+  stale_callback_protection: true
+  array_shift_required: false
 api:
   status: {method: GET, path: /api/v/1/status}
   power_on: {method: POST, path: /api/v/1/power/on}
@@ -93,11 +76,10 @@ upstream:
   target_repository: ALLTERCO/shelly-script-examples
   suggested_path: http-integrations/innova-airleaf/innova-airleaf-ewf644ii_vc.shelly.js
   contribution_file_ready: true
-  hardware_retest_required_before_claiming_full_validation: true
 files:
   readme: README.md
-  controller: innova-airleaf-controller.js
-  self_contained_controller: upstream/innova-airleaf-ewf644ii_vc.shelly.js
+  legacy_controller: innova-airleaf-controller.js
+  production_controller: upstream/innova-airleaf-ewf644ii_vc.shelly.js
   architecture: ARCHITECTURE.md
   changelog: CHANGELOG.md
   faq: FAQ.md
@@ -108,8 +90,7 @@ files:
   github_metadata: GITHUB_METADATA.md
   upstream_submission: docs/UPSTREAM_SUBMISSION.md
 notes:
-  - Shelly Smart Control is the primary operator interface for this project.
-  - Protocol behavior was validated on a real deviceType 002 installation.
-  - The correct INNOVA AirLeaf control reference for this Wi-Fi project is EWF644II.
+  - The public runtime uses a TEST-NET host and must be configured for each installation.
+  - The current production runtime is hardware-tested on Shelly Plug S Gen3 firmware 2.0.0.
+  - The validated INNOVA target reports deviceType 002.
   - Do not generalize unknown working-mode or fan-function values.
-  - This is an independent community project, not an official INNOVA or Shelly integration.
