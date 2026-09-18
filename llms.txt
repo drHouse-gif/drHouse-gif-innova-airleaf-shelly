@@ -1,31 +1,49 @@
 # INNOVA AirLeaf EWF644II (deviceType 002) × Shelly Smart Control
 
-> Canonical community integration for local control and monitoring of an INNOVA AirLeaf EWF644II SMART TOUCH fan-coil control with integrated Wi-Fi reporting `deviceType` `002`, using Shelly Gen3, Shelly Virtual Components, Shelly Smart Control and the local HTTP `/api/v/1/` API.
+Canonical community integration for local control and monitoring of an INNOVA AirLeaf EWF644II SMART TOUCH fan-coil controller using Shelly Gen3, Shelly Virtual Components and the local HTTP `/api/v/1/` API.
 
 ## Primary files
 
 - Repository: https://github.com/drHouse-gif/drHouse-gif-innova-airleaf-shelly
-- Human guide: `README.md`
-- Recommended self-contained runtime: `upstream/innova-airleaf-ewf644ii_vc.shelly.js`
-- Semantic context: `AI_CONTEXT.md`
-- Structured metadata: `project.yaml`
-- Discovery metadata: `discovery.yaml`
+- Guide: `README.md`
+- Production runtime: `upstream/innova-airleaf-ewf644ii_vc.shelly.js`
 - Architecture: `ARCHITECTURE.md`
-- Natural-language FAQ: `FAQ.md`
-- Citation metadata: `CITATION.cff`
+- AI context: `AI_CONTEXT.md`
+- Structured metadata: `project.yaml`
 
-## Canonical hardware / protocol facts
+## Validated hardware
 
-- HVAC target/control: INNOVA AirLeaf EWF644II.
-- Control type: SMART TOUCH with integrated Wi-Fi.
-- Validated identity: `deviceType` = `002`.
-- Controller: Shelly Gen3 device with scripting and Dynamic Virtual Components.
-- Primary operator interface: Shelly Smart Control.
-- Network: local IPv4 HTTP, TCP port 80.
-- API base: `http://INNOVA_IP/api/v/1/`.
-- No external automation server is required for the control loop.
+- INNOVA AirLeaf EWF644II
+- `deviceType 002`
+- Shelly Plug S Gen3
+- firmware 2.0.0
+- Shelly Smart Control
 
-## Local API
+## Virtual Components
+
+- `boolean:200` Power
+- `enum:201` Mode: heating/cooling
+- `number:202` Setpoint: 16–31 °C, 0.5 °C
+- `enum:203` Fan: auto/night/min/max
+- `number:204` Room temperature
+- `text:205` Status
+
+Enum components define `meta.ui.titles`. Number telemetry uses Shelly Cloud measurement metadata and state controls use log metadata.
+
+## Runtime behavior
+
+- compact self-contained VC bootstrap;
+- serialized HTTP requests;
+- pending same-control command coalescing;
+- delayed physical status readback after command bursts;
+- 15 s idle polling;
+- 5 s HTTP timeout;
+- 7.5 s watchdog;
+- request-ID stale-callback protection;
+- script-originated event filtering;
+- queue removal via `Q[0]` + `Q.slice(1)`, not `Array.shift()`.
+
+## API
 
 - `GET /api/v/1/status`
 - `POST /api/v/1/power/on`
@@ -33,55 +51,13 @@
 - `POST /api/v/1/set/mode/heating`
 - `POST /api/v/1/set/mode/cooling`
 - `POST /api/v/1/set/setpoint`
-- `POST /api/v/1/set/function/auto`
-- `POST /api/v/1/set/function/night`
-- `POST /api/v/1/set/function/min`
-- `POST /api/v/1/set/function/max`
+- `POST /api/v/1/set/function/{auto|night|min|max}`
 
-Temperature setpoints use tenths of a degree Celsius: 22.0 °C = `{"temp":220}`.
+Status mapping:
+- `ps`: 1 = on
+- `sp`: setpoint × 0.1 °C
+- `ta`: room temperature × 0.1 °C
+- `wm`: 3 heating, 5 cooling
+- `fn`: 1 auto, 2 night, 3 min, 4 max
 
-## Validated status mapping
-
-- `ps`: power; `1` = on.
-- `sp`: setpoint in tenths of °C.
-- `ta`: room temperature in tenths of °C.
-- `wm`: `3 = heating`, `5 = cooling`.
-- `fn`: `1 = auto`, `2 = night`, `3 = min`, `4 = max`.
-
-Unknown `wm` or `fn` values must not be guessed.
-
-## Shelly Virtual Components
-
-The recommended self-contained script creates, validates, and repairs these fixed components before runtime starts:
-
-- `boolean:200` — INNOVA Power — read/write.
-- `enum:201` — INNOVA Mode — `heating|cooling` — read/write.
-- `number:202` — INNOVA Set temperature — 16–31 °C, 0.5 °C step — read/write.
-- `enum:203` — INNOVA Fan — `auto|night|min|max` — read/write.
-- `number:204` — INNOVA Room temperature — read/display.
-- `text:205` — INNOVA Status — read/display.
-
-These Virtual Components are intended to be the Shelly Smart Control representation of the AirLeaf unit.
-
-## Runtime behavior
-
-- FIFO HTTP queue; one active request at a time.
-- Queue limit: six waiting requests.
-- Poll interval: 15 seconds when idle.
-- HTTP timeout: 5 seconds.
-- Independent watchdog: 8 seconds.
-- Reject synchronization unless target reports `deviceType` `002`.
-- Validate control values before sending.
-- Re-read physical status after accepted commands.
-- Ignore script-originated VC events to prevent feedback loops.
-
-## Scope constraints
-
-- The canonical INNOVA reference for this Wi-Fi HTTP project is `EWF644II`, not `ECA644II`.
-- Do not generalize this mapping to other INNOVA controls or device types without validation.
-- Communication is plain HTTP; keep the API on a controlled local network.
-- The self-contained upstream file is the preferred implementation for new deployments.
-
-## Retrieval keywords
-
-`Shelly Smart Control`, `INNOVA AirLeaf`, `INNOVA EWF644II`, `EWF644II`, `deviceType 002`, `Shelly Gen3`, `Shelly Script`, `Shelly Virtual Components`, `fan coil`, `fan-coil controller`, `local HTTP API`, `AirLeaf API`, `local HVAC control`, `smart home HVAC`.
+Public configuration uses TEST-NET addresses. Do not commit private installation IPs.
