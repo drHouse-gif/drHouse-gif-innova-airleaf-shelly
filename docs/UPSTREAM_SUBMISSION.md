@@ -1,64 +1,81 @@
 # Upstream submission to ALLTERCO/shelly-script-examples
 
-Target upstream repository: `ALLTERCO/shelly-script-examples`
+Target repository: `ALLTERCO/shelly-script-examples`
 
-## Correct target
+## Current submission state
 
-This integration targets **INNOVA AirLeaf EWF644II**, the SMART TOUCH control with integrated Wi-Fi used by this local HTTP project. The validated API response reports `deviceType 002`.
+The contribution branch has been refreshed with the current hardware-tested runtime:
 
-The previous `ECA644II` model reference was incorrect and has been replaced with `EWF644II` in the project and upstream contribution.
+`drHouse-gif/shelly-script-examples:feature/innova-airleaf-eca644ii`
 
-## Upstream file
+The branch name is legacy, but its contents now target **INNOVA AirLeaf EWF644II** and contain the current v6 runtime.
 
-Source repository:
+Existing upstream pull request:
 
-`upstream/innova-airleaf-ewf644ii_vc.shelly.js`
+`ALLTERCO/shelly-script-examples#221`
 
-Planned upstream path:
+The PR is currently closed and not merged. Its head branch now contains the updated files, so reopening the PR will present the refreshed implementation.
 
-`http-integrations/innova-airleaf/innova-airleaf-ewf644ii_vc.shelly.js`
-
-The self-contained runtime:
-
-- creates/reuses/repairs six fixed Virtual Components IDs `200-205`;
-- communicates with the EWF644II local `/api/v/1/` HTTP API;
-- validates `deviceType 002`;
-- serializes HTTP requests;
-- confirms accepted commands with a fresh physical status read;
-- filters script-generated feedback events;
-- uses an independent watchdog;
-- presents the integration through Shelly Virtual Components for Shelly Smart Control.
-
-## Pull Request
-
-Current upstream PR: `ALLTERCO/shelly-script-examples#221`
-
-Recommended title:
+Recommended PR title:
 
 ```text
 Add INNOVA AirLeaf EWF644II local HTTP controller
 ```
 
-Recommended scope text:
+## Validated scope
+
+- INNOVA AirLeaf EWF644II
+- SMART TOUCH with integrated Wi-Fi
+- `deviceType 002`
+- Shelly Plug S Gen3
+- firmware 2.0.0
+- Shelly Smart Control
+- local HTTP API `/api/v/1/`
+
+## Upstream files
+
+- `http-integrations/innova-airleaf/README.md`
+- `http-integrations/innova-airleaf/innova-airleaf-ewf644ii_vc.shelly.js`
+- `http-integrations/README.md`
+- `CHANGELOG.md`
+- `examples-manifest.json`
+
+## Current runtime improvements
+
+The refreshed contribution:
+
+- replaces the higher-memory generic-helper implementation with a compact fixed-component bootstrap;
+- creates or reuses six Virtual Components;
+- adds Shelly Smart Control enum titles;
+- adds Shelly Cloud measurement/log metadata;
+- serializes HTTP requests;
+- coalesces pending same-control changes;
+- performs delayed physical status readback after commands;
+- validates `deviceType 002`;
+- aborts dependent queued control commands after a command failure;
+- protects against stale callbacks with request IDs and a watchdog;
+- avoids `Array.shift()` for compatibility with the tested Shelly mJS runtime;
+- uses a TEST-NET address in public source instead of installation-specific IPs.
+
+## Pull-request summary
+
+Suggested body:
 
 ```markdown
-This PR adds a self-contained Shelly Script example for local monitoring and control of an INNOVA AirLeaf EWF644II SMART TOUCH fan-coil control with integrated Wi-Fi reporting `deviceType 002`.
+Adds a production Shelly Script example for local monitoring and control of an INNOVA AirLeaf EWF644II SMART TOUCH fan-coil controller reporting `deviceType 002`.
 
-The script runs on Shelly Gen3, communicates with the local `/api/v/1/` HTTP API and exposes six Shelly Virtual Components for Shelly Smart Control.
+Validated on Shelly Plug S Gen3 firmware 2.0.0 with Shelly Smart Control.
 
-Tested scope:
-- INNOVA AirLeaf EWF644II
-- `deviceType 002`
-- local HTTP API `/api/v/1/`
-- Shelly Gen3 scripting + Dynamic Virtual Components
+The script exposes Power, heating/cooling mode, target temperature, fan mode, room temperature and connection status as Shelly Virtual Components. It uses a compact self-contained VC bootstrap, serialized/coalesced HTTP commands, physical-state readback, enum UI titles, Shelly Cloud metadata, a watchdog and stale-callback protection.
 ```
 
 ## Validation status
 
 - [x] Correct model reference: EWF644II.
-- [x] Original HTTP controller logic validated against a real `deviceType 002` installation.
-- [x] Self-contained VC-provisioning runtime prepared.
-- [x] Six fixed Virtual Components preserved.
-- [ ] Final combined start-from-empty-VC path re-tested on Shelly hardware before final merge.
-
-Do not describe `ECA644II` as the tested Wi-Fi controller for this project.
+- [x] Real `deviceType 002` protocol validated.
+- [x] Current self-contained runtime tested on Shelly Plug S Gen3.
+- [x] Shelly Smart Control enum labels validated.
+- [x] Memory-reduced runtime replaces the previous OOM-prone helper build.
+- [x] Public source uses a TEST-NET address.
+- [x] Manifest, changelog and HTTP integration index prepared.
+- [ ] Upstream PR #221 must be reopened or replaced from the GitHub UI because the connected GitHub integration does not have permission to modify pull requests in the ALLTERCO repository.
